@@ -195,6 +195,7 @@ submitBtn.addEventListener('click', (e) => {
   let result = false;
   selectorList.forEach((selector) => {
     if (Validator(selector)) {
+      console.log(Validator(selector), 'Validator');
       result = true;
     }
   });
