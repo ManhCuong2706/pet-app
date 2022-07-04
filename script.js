@@ -1,37 +1,32 @@
 'use strict';
 
-const getElmFunc = (e) => {
+const $ = (e) => {
   return document.querySelector(e);
 };
 
-const submitBtn = getElmFunc('#submit-btn');
-const petID = getElmFunc('#input-id');
-const petName = getElmFunc('#input-name');
-const petAge = getElmFunc('#input-age');
-const petType = getElmFunc('#input-type');
-const petWeight = getElmFunc('#input-weight');
-const petLength = getElmFunc('#input-length');
-const petColor = getElmFunc('#input-color');
-const petBreed = getElmFunc('#input-breed');
-const vaccinatedInput = getElmFunc('#input-vaccinated');
-const dewormedInput = getElmFunc('#input-dewormed');
-const sterilizedInput = getElmFunc('#input-sterilized');
-const errorMessageElm = document.querySelectorAll('.error-message');
-const tbBodyElm = getElmFunc('#tbody');
+const $$ = (e) => {
+  return document.querySelectorAll(e);
+};
 
-const selectorList = [
-  '#input-id',
-  '#input-name',
-  '#input-age',
-  '#input-type',
-  '#input-weight',
-  '#input-length',
-  '#input-breed',
-];
+const submitBtn = $('#submit-btn');
+const petID = $('#input-id');
+const petName = $('#input-name');
+const petAge = $('#input-age');
+const petType = $('#input-type');
+const petWeight = $('#input-weight');
+const petLength = $('#input-length');
+const petColor = $('#input-color-1');
+const petBreed = $('#input-breed');
+const vaccinatedInput = $('#input-vaccinated');
+const dewormedInput = $('#input-dewormed');
+const sterilizedInput = $('#input-sterilized');
+const tbBodyElm = $('#tbody');
+const deletePetBtn = $('.delete-pet');
 
 const petData = {};
 const petDataList = [];
 
+// Get pet data
 const getPetData = () => {
   return {
     id: petID.value,
@@ -48,123 +43,61 @@ const getPetData = () => {
     date: new Date(),
   };
 };
-const showError = (selector, message) => {
-  const index = selectorList.indexOf(selector);
 
-  return (errorMessageElm[index].textContent = message);
-};
-
-const Validator = (selector) => {
-  console.log(isRequired(selector), 'isRequired');
-  console.log(isInRange(selector), 'isInRange');
-  console.log(isUniqueID(selector), 'isUniqueID');
-  console.log(hasSelected(selector), 'hasSelected');
-
-  if (
-    !isRequired(selector) &&
-    isUniqueID(selector) &&
-    isInRange(selector) &&
-    hasSelected(selector)
-  ) {
-    return true;
-  } else {
-    return false;
-  }
-};
-// isRequired function
-const isRequired = (selector) => {
-  if (selector !== '#input-breed' || selector !== '#input-type') {
-    const value = getElmFunc(selector).value;
-    if (!value) {
-      showError(selector, 'Please input this field !');
-      return false;
+// Validate function
+function validateForm() {
+  let checked = true;
+  for (let i = 0; i < petDataList.length; i++) {
+    if (petDataList[i].id === petID.value) {
+      alert('ID must unique!');
+      checked = false;
+      break;
     }
   }
-  return true;
-};
 
-// isUniqueID function
-const isUniqueID = (selector) => {
-  const petID = getElmFunc(selector).value;
-  const petIndex = petDataList.findIndex((pet) => pet.id === petID);
-
-  if (selector === '#input-id' && petIndex !== -1) {
-    showError(selector, 'ID should be unique!');
-    return false;
+  if (!petID.value) {
+    alert(`Please enter ID!`);
+    checked = false;
   }
-  return true;
-};
-// IsAgeArrange function
-
-const isAgeInRange = (selector) => {
-  if (selector === '#input-age') {
-    const age = parseInt(getElmFunc(selector).value);
-    if (age < 1 || age > 15) showError(selector, 'Age must be between 1 and 15');
-    return false;
+  if (!petName.value) {
+    alert(`Please enter name!`);
+    checked = false;
   }
-  return true;
-};
-
-const isWeightInRange = (selector) => {
-  if (selector === '#input-weight') {
-    const weight = parseInt(getElmFunc(selector).value);
-    if (weight < 1 || weight > 15) showError(selector, 'Weight must be between 1 and 15');
-    return false;
+  if (!petAge.value) {
+    alert(`Please enter age!`);
+    checked = false;
+  } else if (petAge.value < 1 || petAge.value > 15) {
+    alert(`Age must be between 1 and 15'`);
+    checked = false;
+  } else if (!petWeight.value) {
+    alert(`Please enter weight!`);
+    checked = false;
+  } else if (petWeight.value > 15 || petWeight.value < 1) {
+    alert(`Weight must be between 1 and 15`);
+    checked = false;
   }
-  return true;
-};
-
-const isLengthInRange = (selector) => {
-  if (selector === '#input-length') {
-    const length = parseInt(getElmFunc(selector).value);
-    if (length < 1 || length > 100) showError(selector, 'Length must be between 1 and 100');
-    return false;
+  if (!petLength.value) {
+    alert(`Please enter length!`);
+    checked = false;
   }
-  return true;
-};
-
-const isInRange = (selector) => {
-  switch (selector) {
-    case '#input-age':
-      return isAgeInRange(selector);
-    case '#input-weight':
-      return isWeightInRange(selector);
-    case '#input-length':
-      return isLengthInRange(selector);
-    default:
-      return true;
+  if (petLength.value > 100 || petLength.value < 1) {
+    alert(`Length must be between 1 and 100`);
+    checked = false;
   }
-};
-// hasSelected function
-
-const hasTypeSelected = (selector) => {
-  const type = getElmFunc(selector).value;
-  if (selector === '#input-type' && !type.trim()) {
-    showError(selector, 'Please select Type!');
-    return false;
+  if (!petColor.value) {
+    alert(`Please enter color!`);
+    checked = false;
   }
-  return true;
-};
-
-const hasBreedSelected = (selector) => {
-  if (selector) {
-    const breed = getElmFunc(selector).value;
-    breed.trim() ? breed : showError(selector, 'Please select Breed!');
-    return false;
+  if (petBreed.value === 'Select Breed' || petBreed.value === '') {
+    alert(`Please select breed!`);
+    checked = false;
   }
-  return true;
-};
-
-const hasSelected = (selector) => {
-  switch (selector) {
-    case '#input-type':
-      return hasTypeSelected(selector);
-    case '#input-breed':
-      return hasBreedSelected(selector);
-    default:
-      return true;
+  if (petType.value === 'Select Type' || petType.value === '') {
+    alert(`Please select type!`);
+    checked = false;
   }
-};
+  return checked;
+}
 
 // Render function
 const render = (petDataList) => {
@@ -185,21 +118,49 @@ const render = (petDataList) => {
                 <td><i class="bi ${pet.sterilized ? 'bi-check-circle-fill' : ''}"></i></td>
                 <td>${pet.date.toLocaleDateString('en-US')}</td>
                 <td>
-                  <button type="button" class="btn btn-danger">Delete</button>
+                  <button
+                  type="button" 
+                  class="btn btn-danger "
+                  onclick="deletePet(${petID.value})">
+                    Delete
+                  </button>
                 </td>
     </tr>`;
   });
 };
 
-submitBtn.addEventListener('click', (e) => {
-  let result = false;
-  selectorList.forEach((selector) => {
-    if (Validator(selector)) {
-      console.log(Validator(selector), 'Validator');
-      result = true;
-    }
-  });
-  if (result) petDataList.push(getPetData());
+// Clear value function
 
-  tbBodyElm.innerHTML = render(petDataList).join('');
+const clearInput = () => {
+  petID.value = '';
+  petName.value = '';
+  petAge.value = '';
+  petType.value = 'Select Type';
+  petWeight.value = '';
+  petLength.value = '';
+  petBreed.value = 'Select Breed';
+  petColor.value = '#000000';
+  vaccinatedInput.checked = false;
+  dewormedInput.checked = false;
+  sterilizedInput.checked = false;
+};
+
+// Delete pet function
+
+const deletePet = (id) => {
+  if (confirm('Are you sure ?')) {
+    petDataList.forEach((pet) => {
+      petDataList.splice(pet.indexOf(id), 0);
+    });
+  }
+};
+
+// Submit pet to List
+submitBtn.addEventListener('click', (e) => {
+  if (validateForm()) {
+    petDataList.push(getPetData());
+    console.log(petDataList);
+    tbBodyElm.innerHTML = render(petDataList).join('');
+    clearInput();
+  }
 });
