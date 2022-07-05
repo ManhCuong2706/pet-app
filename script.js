@@ -1,5 +1,6 @@
 'use strict';
 
+// Get element function
 const $ = (e) => {
   return document.querySelector(e);
 };
@@ -22,11 +23,13 @@ const dewormedInput = $('#input-dewormed');
 const sterilizedInput = $('#input-sterilized');
 const tbBodyElm = $('#tbody');
 const deletePetBtn = $('.delete-pet');
+const showHealthyPet = $('#healthy-btn');
+const calculateBMI = $('#cal-bmi-btn');
 
 const petData = {};
 const petDataList = [];
 
-// Get pet data
+// Get pet data when user submit
 const getPetData = () => {
   return {
     id: petID.value,
@@ -40,6 +43,7 @@ const getPetData = () => {
     vaccinated: vaccinatedInput.checked,
     dewormed: dewormedInput.checked,
     sterilized: sterilizedInput.checked,
+    bmi: '?',
     date: new Date(),
   };
 };
@@ -47,51 +51,60 @@ const getPetData = () => {
 // Validate function
 function validateForm() {
   let checked = true;
+
   for (let i = 0; i < petDataList.length; i++) {
+    //check id is unique
     if (petDataList[i].id === petID.value) {
       alert('ID must unique!');
       checked = false;
       break;
     }
   }
-
+  // check ID is required
   if (!petID.value) {
     alert(`Please enter ID!`);
     checked = false;
   }
+  // check Pet name
   if (!petName.value) {
     alert(`Please enter name!`);
     checked = false;
   }
+  // Check Pet age
   if (!petAge.value) {
     alert(`Please enter age!`);
     checked = false;
   } else if (petAge.value < 1 || petAge.value > 15) {
     alert(`Age must be between 1 and 15'`);
     checked = false;
-  } else if (!petWeight.value) {
+  }
+  // Check Pet weight
+  if (!petWeight.value) {
     alert(`Please enter weight!`);
     checked = false;
   } else if (petWeight.value > 15 || petWeight.value < 1) {
     alert(`Weight must be between 1 and 15`);
     checked = false;
   }
+  // Check Pet Length
   if (!petLength.value) {
     alert(`Please enter length!`);
     checked = false;
-  }
-  if (petLength.value > 100 || petLength.value < 1) {
+  } else if (petLength.value > 100 || petLength.value < 1) {
     alert(`Length must be between 1 and 100`);
     checked = false;
   }
+  // Check Pet color
   if (!petColor.value) {
     alert(`Please enter color!`);
     checked = false;
   }
+  // Check Pet Breed
   if (petBreed.value === 'Select Breed' || petBreed.value === '') {
     alert(`Please select breed!`);
     checked = false;
   }
+  // Check Pet Type
   if (petType.value === 'Select Type' || petType.value === '') {
     alert(`Please select type!`);
     checked = false;
@@ -100,15 +113,15 @@ function validateForm() {
 }
 
 // Render function
-const render = (petDataList) => {
-  return petDataList.map((pet) => {
+const render = (itemList) => {
+  return (tbBodyElm.innerHTML = itemList.map((pet) => {
     return `<tr>
                 <th scope="row">${pet.id}</th>
                 <td>${pet.name}</td>
                 <td>${pet.age}</td>
                 <td>${pet.type}</td>
-                <td>${pet.weight}</td>
-                <td>${pet.length}</td>
+                <td>${pet.weight} kg</td>
+                <td>${pet.length} cm</td>
                 <td>${pet.breed}</td>
                 <td>
                   <i class="bi bi-square-fill" style="color:${pet.color}"></i>
@@ -116,20 +129,21 @@ const render = (petDataList) => {
                 <td><i class="bi ${pet.vaccinated ? 'bi-check-circle-fill' : ''} "></i></td>
                 <td><i class="bi ${pet.dewormed ? 'bi-check-circle-fill' : ''}"></i></td>
                 <td><i class="bi ${pet.sterilized ? 'bi-check-circle-fill' : ''}"></i></td>
+                <td>${pet.bmi}</td>
                 <td>${pet.date.toLocaleDateString('en-US')}</td>
                 <td>
                   <button
-                  type="button" 
+                  type="button"
                   class="btn btn-danger "
-                  onclick="deletePet(${petID.value})">
+                  onclick="deletePet('${pet.id}')">
                     Delete
                   </button>
                 </td>
     </tr>`;
-  });
+  }));
 };
 
-// Clear value function
+// Clear input value function
 
 const clearInput = () => {
   petID.value = '';
@@ -147,20 +161,56 @@ const clearInput = () => {
 
 // Delete pet function
 
-const deletePet = (id) => {
+const deletePet = (petID) => {
   if (confirm('Are you sure ?')) {
-    petDataList.forEach((pet) => {
-      petDataList.splice(pet.indexOf(id), 0);
-    });
+    for (let i = 0; i < petDataList.length; i++) {
+      if (petDataList[i].id === petID) {
+        petDataList.splice(i, 1);
+      }
+    }
   }
+  render(petDataList).join('');
 };
 
 // Submit pet to List
 submitBtn.addEventListener('click', (e) => {
   if (validateForm()) {
     petDataList.push(getPetData());
-    console.log(petDataList);
-    tbBodyElm.innerHTML = render(petDataList).join('');
+    render(petDataList).join('');
     clearInput();
   }
 });
+
+// Show healthy pet List
+
+let isHealthy = true;
+showHealthyPet.onclick = (e) => {
+  if (isHealthy) {
+    // Case isHealthy = true -> filter new list -> render new list -> assign isHealthy=false -> switch button
+
+    isHealthy = false;
+    let healthyPetList = petDataList.filter(
+      (pet) => pet.vaccinated === true && pet.dewormed === true && pet.sterilized === true
+    );
+
+    showHealthyPet.textContent = 'Show All Pet';
+    render(healthyPetList).join('');
+  } else {
+    // Case isHealthy = false -> assign isHealthy = true -> render petDataList -> switch button
+    isHealthy = true;
+    showHealthyPet.textContent = 'Show Healthy Pet';
+    render(petDataList).join('');
+  }
+};
+
+// calculate Pet BMI
+
+calculateBMI.onclick = () => {
+  petDataList.forEach((pet) => {
+    const dogBMI = (pet.weight * 703) / pet.length ** 2;
+    const catBMI = (pet.weight * 886) / pet.length ** 2;
+
+    pet.bmi = pet.type === 'Dog' ? dogBMI.toFixed(2) : catBMI.toFixed(2);
+  });
+  render(petDataList).join('');
+};
